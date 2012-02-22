@@ -138,22 +138,25 @@ def write_arcv1_header(arc_v1_file):
 def main(input_file, output_arcv1_file, output_arcv2_file, output_rejects_file):
     good = 0
     bad = 0
-    with CuilDump(input_file) as ip, open(output_arcv1_file, "w") as op1, open(output_arcv2_file,"w") as op2, open(output_rejects_file,"w") as rej:
-        write_arcv1_header(op1)
-        for record in ip:
-            try:
-                if not record.arc1_record:
-                    logging.warning("Couldn't handle %s [G: %d, B:%d]\n", record, good, bad)
-                    rej.write(record.original)
-                    bad +=1
-                    continue
-                op1.write(record.arc1_record)
-                # op2.write(record.arc2_record)
-                good +=1
-            except Exception:
-                logging.warning("Couldn't handle %s [G: %d, B:%d]\n", record, good, bad, exc_info = True)
-                rej.write(record.original)
-                bad +=1
+    with CuilDump(input_file) as ip:
+        with open(output_arcv1_file, "w") as op1:
+            with open(output_arcv2_file,"w") as op2:
+                with open(output_rejects_file,"w") as rej:
+                    write_arcv1_header(op1)
+                    for record in ip:
+                        try:
+                            if not record.arc1_record:
+                                logging.warning("Couldn't handle %s [G: %d, B:%d]\n", record, good, bad)
+                                rej.write(record.original)
+                                bad +=1
+                                continue
+                            op1.write(record.arc1_record)
+                            # op2.write(record.arc2_record)
+                            good +=1
+                        except Exception:
+                            logging.warning("Couldn't handle %s [G: %d, B:%d]\n", record, good, bad, exc_info = True)
+                            rej.write(record.original)
+                            bad +=1
     print "%s Records written to '%s'. %d records rejected"% (good, output_arcv1_file, bad)
     return 0
 
